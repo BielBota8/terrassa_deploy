@@ -108,11 +108,12 @@ def siad_preprocess(df):
     df[['MIN_EDAT', 'MAX_EDAT']] = df['GR_EDAT'].apply(lambda x: pd.Series(extract_min_max(x)))
 
     df["EDAT"] = df.apply(
-        lambda row: row['EDAT']
-        if pd.isna(row['MIN_EDAT']) or pd.isna(row['MAX_EDAT']) or row['MIN_EDAT'] <= row['EDAT'] <= row['MAX_EDAT']
-        else random.randint(row['MIN_EDAT'], row['MAX_EDAT']),
-        axis=1
+    lambda row: row['EDAT']
+    if pd.isna(row['MIN_EDAT']) or pd.isna(row['MAX_EDAT']) or row['MIN_EDAT'] <= row['EDAT'] <= row['MAX_EDAT']
+    else random.randint(int(row['MIN_EDAT']), int(row['MAX_EDAT'])),
+    axis=1
     )
+
 
     df = df.drop(columns=["MIN_EDAT", "MAX_EDAT"])
 
