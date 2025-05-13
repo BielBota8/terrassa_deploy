@@ -69,36 +69,3 @@ def read_dades_ajuts_menjador(data):
 
     return menja_preprocessing(data_df)
 
-
-
-def show_download_buttons(dades_discriminacions, dades_ajuts_menjador):
-    """
-    Muestra botones de descarga en la interfaz de Streamlit para los datos proporcionados.
-    """
-    if dades_discriminacions is not None:
-        csv_discriminacions = dades_discriminacions.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="Descargar dades_discriminacions.csv",
-            data=csv_discriminacions,
-            file_name="dades_discriminacions.csv",
-            mime='text/csv'
-        )
-
-    if dades_ajuts_menjador is not None:
-        csv_ajuts = dades_ajuts_menjador.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="Descargar dades_ajuts_menjador.csv",
-            data=csv_ajuts,
-            file_name="dades_ajuts_menjador.csv",
-            mime='text/csv'
-        )
-
-    if dades_discriminacions is not None and dades_ajuts_menjador is not None:
-        merged = join_preprocessing(dades_discriminacions, dades_ajuts_menjador)
-        csv_merged = merged.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="Descargar dades_merged.csv",
-            data=csv_merged,
-            file_name="dades_merged.csv",
-            mime='text/csv'
-        )

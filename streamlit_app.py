@@ -6,7 +6,6 @@ from PIL import Image
 
 from file_processor import read_dades_discriminacions
 from file_processor import read_dades_ajuts_menjador
-from file_processor import show_download_buttons
 
 from config import get_base64_image, create_stylish_sidebar, display_page_header
 
@@ -150,23 +149,50 @@ elif menu == "Carregar Dades":
 
     # Save data button with verification check
     if st.button('Guardar Dades'):
-        if 'dades_discriminacions' in st.session_state or 'dades_ajut_menjador' in st.session_state:
-            # Pass the processed DataFrames from session_state, not the raw uploaded files
-            show_download_buttons(
-                st.session_state.get('dades_discriminacions'),
-                st.session_state.get('dades_ajut_menjador')
-            )
+        dades_discriminacions = st.session_state.get('dades_discriminacions')
+        dades_ajut_menjador = st.session_state.get('dades_ajut_menjador')
 
-            if 'dades_discriminacions' in st.session_state and st.session_state.dades_discriminacions is not None:
+        if dades_discriminacions is not None or dades_ajut_menjador is not None:
+            
+            if dades_discriminacions is not None:
+                csv_discriminacions = dades_discriminacions.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="Descargar dades_discriminacions.csv",
+                    data=csv_discriminacions,
+                    file_name="dades_discriminacions.csv",
+                    mime='text/csv'
+                )
+
+            if dades_ajut_menjador is not None:
+                csv_ajuts = dades_ajut_menjador.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="Descargar dades_ajuts_menjador.csv",
+                    data=csv_ajuts,
+                    file_name="dades_ajuts_menjador.csv",
+                    mime='text/csv'
+                )
+
+            if dades_discriminacions is not None and dades_ajut_menjador is not None:
+                merged = join_preprocessing(dades_discriminacions, dades_ajut_menjador)
+                csv_merged = merged.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="Descargar dades_merged.csv",
+                    data=csv_merged,
+                    file_name="dades_merged.csv",
+                    mime='text/csv'
+                )
+
+            # Mensajes de éxito
+            if dades_discriminacions is not None and dades_ajut_menjador is not None:
                 st.success("Totes les dades han estat guardades correctament.")
-            elif 'dades_ajut_menjador' in st.session_state and st.session:
+            elif dades_ajut_menjador is not None:
                 st.success("Dades d'ajuts menjador guardades correctament.")
             else:
                 st.success("Dades de discriminacions guardades correctament.")
-            
+        
         else:
             st.error("No hi ha dades per guardar. Si us plau, carrega algun fitxer primer.")
-    
+
 
     st.markdown("</div>", unsafe_allow_html=True)
     
