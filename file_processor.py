@@ -2,7 +2,9 @@ import pandas as pd
 import os
 from SIAD_preprocessing import siad_preprocess
 from MENJADOR_preprocessing import menja_preprocessing
-from JOIN_preprocessing import join_preprocessing    
+from JOIN_preprocessing import join_preprocessing   
+import streamlit as st
+import io 
 
 def read_dades_discriminacions(data):
     """
@@ -69,24 +71,34 @@ def read_dades_ajuts_menjador(data):
 
 
 
-def write_data_to_folder(dades_discriminacions, dades_ajuts_menjador):
+def show_download_buttons(dades_discriminacions, dades_ajuts_menjador):
     """
-    Writes the discrimination and meal assistance data to CSV files in the user's Downloads folder.
-
-    Parameters:
-    dades_discriminacions (pandas.DataFrame): DataFrame containing the discrimination data.
-    dades_ajuts_menjador (pandas.DataFrame): DataFrame containing the meal assistance data.
+    Muestra botones de descarga en la interfaz de Streamlit para los datos proporcionados.
     """
-    data_path = os.path.join(os.path.expanduser('~'), 'Downloads')
-
     if dades_discriminacions is not None:
-        dades_discriminacions.to_csv(os.path.join(data_path, 'dades_discriminacions.csv'), index=False)
-
+        csv_discriminacions = dades_discriminacions.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Descargar dades_discriminacions.csv",
+            data=csv_discriminacions,
+            file_name="dades_discriminacions.csv",
+            mime='text/csv'
+        )
 
     if dades_ajuts_menjador is not None:
-        dades_ajuts_menjador.to_csv(os.path.join(data_path, 'dades_ajuts_menjador.csv'), index=False)
+        csv_ajuts = dades_ajuts_menjador.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Descargar dades_ajuts_menjador.csv",
+            data=csv_ajuts,
+            file_name="dades_ajuts_menjador.csv",
+            mime='text/csv'
+        )
 
     if dades_discriminacions is not None and dades_ajuts_menjador is not None:
         merged = join_preprocessing(dades_discriminacions, dades_ajuts_menjador)
-        merged.to_csv(os.path.join(data_path, 'dades_merged.csv'), index=False)
-
+        csv_merged = merged.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Descargar dades_merged.csv",
+            data=csv_merged,
+            file_name="dades_merged.csv",
+            mime='text/csv'
+        )

@@ -6,7 +6,7 @@ from PIL import Image
 
 from file_processor import read_dades_discriminacions
 from file_processor import read_dades_ajuts_menjador
-from file_processor import write_data_to_folder
+from file_processor import show_download_buttons
 
 from config import get_base64_image, create_stylish_sidebar, display_page_header
 
@@ -152,7 +152,7 @@ elif menu == "Carregar Dades":
     if st.button('Guardar Dades'):
         if 'dades_discriminacions' in st.session_state or 'dades_ajut_menjador' in st.session_state:
             # Pass the processed DataFrames from session_state, not the raw uploaded files
-            write_data_to_folder(
+            show_download_buttons(
                 st.session_state.get('dades_discriminacions'),
                 st.session_state.get('dades_ajut_menjador')
             )
