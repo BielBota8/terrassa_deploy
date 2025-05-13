@@ -13,7 +13,7 @@ def siad_preprocess(df):
     Returns:
         pandas.DataFrame: Preprocessed discrimination data.
     """
-    
+
     cols_important = ['ID_UPC', 'COD_CITA', 'DISTRICTE_PH', 'SECCIO_PH', 'BARRI_PH',
                       'NOM_BARRI_PH', 'NOM_AREA', 'COD_EXPEDIENT', 'DATA_CITA_INI',
                       'NOM_TIPUSCITA', 'DATA_CITA_FI', 'DATA_OBERTURA', 'DESC_DENUNCIA', 'EDAT',
@@ -34,50 +34,66 @@ def siad_preprocess(df):
             df[missing_column] = np.nan
         df = df[cols_important].copy()
 
-    df.loc[:, "DATA_CITA_INI"] = pd.to_datetime(df["DATA_CITA_INI"], format='mixed')
-    df.loc[:, "DATA_CITA_FI"] = pd.to_datetime(df["DATA_CITA_FI"], format='mixed')
-    df.loc[:, "DATA_OBERTURA"] = pd.to_datetime(df["DATA_OBERTURA"], format='mixed')
+    df["DATA_CITA_INI"] = pd.to_datetime(df["DATA_CITA_INI"], format='mixed')
+    df["DATA_CITA_FI"] = pd.to_datetime(df["DATA_CITA_FI"], format='mixed')
+    df["DATA_OBERTURA"] = pd.to_datetime(df["DATA_OBERTURA"], format='mixed')
 
-    df.loc[:, "DURADA_CITA"] = df.apply(lambda col: col["DATA_CITA_FI"] - col["DATA_CITA_INI"]
-                                        if col["DATA_CITA_FI"] > col["DATA_CITA_INI"]
-                                        else col["DATA_CITA_INI"] - col["DATA_CITA_FI"], axis=1)
+    df["DURADA_CITA"] = df.apply(
+        lambda col: col["DATA_CITA_FI"] - col["DATA_CITA_INI"]
+        if col["DATA_CITA_FI"] > col["DATA_CITA_INI"]
+        else col["DATA_CITA_INI"] - col["DATA_CITA_FI"],
+        axis=1
+    )
 
     if df["DURADA_CITA"].notna().all():
-        df.loc[:, "DURADA_CITA"] = df['DURADA_CITA'].dt.total_seconds() / 60
+        df["DURADA_CITA"] = df['DURADA_CITA'].dt.total_seconds() / 60
 
     df = df.drop(columns=["DATA_CITA_FI"])
 
-    df = df[(df["DATA_OBERTURA"] >= '01-01-2015') | df["DATA_OBERTURA"].isna()].copy()
+    # 🔧 Corrección aquí: convertimos la cadena a Timestamp para comparar correctamente
+    df = df[(df["DATA_OBERTURA"] >= pd.Timestamp("2015-01-01")) | df["DATA_OBERTURA"].isna()].copy()
 
-    df.loc[:, "NOM_EXP_TITULACIO"] = df["NOM_EXP_TITULACIO"].fillna(df["NOM_PER_TITULACIO"])
+    df["NOM_EXP_TITULACIO"] = df["NOM_EXP_TITULACIO"].fillna(df["NOM_PER_TITULACIO"])
     df = df.drop(columns=["NOM_PER_TITULACIO"])
 
     np.random.seed(1)
     if df["DISCAPACITAT"].isna().all():
-        df.loc[:, "DISCAPACITAT"] = np.random.choice(['No', 'Si'], size=len(df), p=[0.98, 0.02])
+        df["DISCAPACITAT"] = np.random.choice(['No', 'Si'], size=len(df), p=[0.98, 0.02])
 
     if df["ORDRE PROTECCIO"].isna().all():
-        df.loc[:, "ORDRE PROTECCIO"] = df.apply(lambda row: 'No' if pd.isna(row['COD_MAL']) else
-                                                np.random.choice(['No', 'Si'], p=[0.86, 0.14]), axis=1)
+        df["ORDRE PROTECCIO"] = df.apply(
+            lambda row: 'No' if pd.isna(row['COD_MAL']) else np.random.choice(['No', 'Si'], p=[0.86, 0.14]),
+            axis=1
+        )
 
     if df["DESC_MALTRACTAMENT"].isna().all():
-        df.loc[:, "DESC_MALTRACTAMENT"] = df.apply(
+        df["DESC_MALTRACTAMENT"] = df.apply(
             lambda row: 'No aplica' if pd.isna(row['COD_MAL']) else
-            np.random.choice(["Maltractament fisic", "Maltractament global", "Maltractament psicologic",
-                              "Maltracte sexual", "Violència vicaria", "Mutilació genial femenina",
-                              "Violència obstètrica", "Violència econòmica", "Negligència", "Orientació Sexual"],
-                             p=[0.2441, 0.1034, 0.5678, 0.0508, 0.0237, 0.0051, 0.0007, 0.0034, 0.0005, 0.0005]), axis=1)
+            np.random.choice([
+                "Maltractament fisic", "Maltractament global", "Maltractament psicologic",
+                "Maltracte sexual", "Violència vicaria", "Mutilació genial femenina",
+                "Violència obstètrica", "Violència econòmica", "Negligència", "Orientació Sexual"
+            ],
+                p=[0.2441, 0.1034, 0.5678, 0.0508, 0.0237, 0.0051, 0.0007, 0.0034, 0.0005, 0.0005]
+            ),
+            axis=1
+        )
 
     if df["DESC_AGRESSOR"].isna().all():
-        df.loc[:, "DESC_AGRESSOR"] = df.apply(
+        df["DESC_AGRESSOR"] = df.apply(
             lambda row: 'Sense dades' if pd.isna(row['COD_MAL']) else
-            np.random.choice(["Parella", "Ex-parella", "Pares", "Pare", "Àmbit sanitari",
-                              "Familiar", "Fill/a", "Feina", "Conegut", "Desconegut"],
-                             p=[0.6154, 0.2271, 0.0391, 0.0017, 0.0017, 0.0271, 0.0323, 0.0169, 0.0169, 0.0218]), axis=1)
+            np.random.choice([
+                "Parella", "Ex-parella", "Pares", "Pare", "Àmbit sanitari",
+                "Familiar", "Fill/a", "Feina", "Conegut", "Desconegut"
+            ],
+                p=[0.6154, 0.2271, 0.0391, 0.0017, 0.0017, 0.0271, 0.0323, 0.0169, 0.0169, 0.0218]
+            ),
+            axis=1
+        )
 
     for column in df.columns:
         if df[column].dtype == 'object':
-            df.loc[:, column] = df[column].fillna('Sense dades')
+            df[column] = df[column].fillna('Sense dades')
 
     def extract_min_max(range_str):
         if '-' in range_str:
@@ -91,7 +107,7 @@ def siad_preprocess(df):
 
     df[['MIN_EDAT', 'MAX_EDAT']] = df['GR_EDAT'].apply(lambda x: pd.Series(extract_min_max(x)))
 
-    df.loc[:, "EDAT"] = df.apply(
+    df["EDAT"] = df.apply(
         lambda row: row['EDAT']
         if pd.isna(row['MIN_EDAT']) or pd.isna(row['MAX_EDAT']) or row['MIN_EDAT'] <= row['EDAT'] <= row['MAX_EDAT']
         else random.randint(row['MIN_EDAT'], row['MAX_EDAT']),
@@ -108,7 +124,7 @@ def siad_preprocess(df):
     df["DESC_TIPUS_ALTA"] = df["DESC_TIPUS_ALTA"].replace('Sense informacio', 'Sense dades')
     df["GR_EDAT"] = df["GR_EDAT"].replace('>80', '80+')
 
-    df = df[(df["DATA_OBERTURA"] != '1900-01-01')]
+    df = df[df["DATA_OBERTURA"] != pd.Timestamp("1900-01-01")]
     df = df.dropna(subset=['DATA_OBERTURA'])
 
     return df, missing
