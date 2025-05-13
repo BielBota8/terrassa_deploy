@@ -6,6 +6,7 @@ from PIL import Image
 
 from file_processor import read_dades_discriminacions
 from file_processor import read_dades_ajuts_menjador
+from JOIN_preprocessing import join_preprocessing
 
 from config import get_base64_image, create_stylish_sidebar, display_page_header
 
