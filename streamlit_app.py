@@ -78,60 +78,51 @@ elif menu == "Carregar Dades":
             st.error(f"Error en carregar les dades: {e}")
 
     # Save data button with verification check
-    if st.button('Guardar Dades'):
-        dades_discriminacions = st.session_state.get('dades_discriminacions')
-        dades_ajut_menjador = st.session_state.get('dades_ajut_menjador')
+    st.markdown("### Guardar Dades")
 
-        # Ensure both datasets are available before allowing download
-        if dades_discriminacions is not None or dades_ajut_menjador is not None:
-            
-            if dades_discriminacions is not None:
-                try:
-                    csv_discriminacions = dades_discriminacions.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="Descargar dades_discriminacions.csv",
-                        data=csv_discriminacions,
-                        file_name="dades_discriminacions.csv",
-                        mime='text/csv'
-                    )
-                except Exception as e:
-                    st.error(f"Error al generar el CSV de dades_discriminacions: {e}")
+    dades_discriminacions = st.session_state.get('dades_discriminacions')
+    dades_ajut_menjador = st.session_state.get('dades_ajut_menjador')
 
-            if dades_ajut_menjador is not None:
-                try:
-                    csv_ajuts = dades_ajut_menjador.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="Descargar dades_ajuts_menjador.csv",
-                        data=csv_ajuts,
-                        file_name="dades_ajuts_menjador.csv",
-                        mime='text/csv'
-                    )
-                except Exception as e:
-                    st.error(f"Error al generar el CSV de dades_ajuts_menjador: {e}")
+    if dades_discriminacions is not None:
+        try:
+            csv_discriminacions = dades_discriminacions.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Descarregar dades_discriminacions.csv",
+                data=csv_discriminacions,
+                file_name="dades_discriminacions.csv",
+                mime='text/csv',
+                key="download_discriminacions"
+            )
+        except Exception as e:
+            st.error(f"Error al generar el CSV de dades_discriminacions: {e}")
 
-            if dades_discriminacions is not None and dades_ajut_menjador is not None:
-                try:
-                    merged = join_preprocessing(dades_discriminacions, dades_ajut_menjador)
-                    csv_merged = merged.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="Descargar dades_merged.csv",
-                        data=csv_merged,
-                        file_name="dades_merged.csv",
-                        mime='text/csv'
-                    )
-                except Exception as e:
-                    st.error(f"Error al generar el CSV de dades_merged: {e}")
+    if dades_ajut_menjador is not None:
+        try:
+            csv_ajuts = dades_ajut_menjador.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Descarregar dades_ajuts_menjador.csv",
+                data=csv_ajuts,
+                file_name="dades_ajuts_menjador.csv",
+                mime='text/csv',
+                key="download_ajuts"
+            )
+        except Exception as e:
+            st.error(f"Error al generar el CSV de dades_ajuts_menjador: {e}")
 
-            # Mensajes de éxito
-            if dades_discriminacions is not None and dades_ajut_menjador is not None:
-                st.success("Totes les dades han estat guardades correctament.")
-            elif dades_ajut_menjador is not None:
-                st.success("Dades d'ajuts menjador guardades correctament.")
-            else:
-                st.success("Dades de discriminacions guardades correctament.")
-        
-        else:
-            st.error("No hi ha dades per guardar. Si us plau, carrega algun fitxer primer.")
+    if dades_discriminacions is not None and dades_ajut_menjador is not None:
+        try:
+            merged = join_preprocessing(dades_discriminacions, dades_ajut_menjador)
+            csv_merged = merged.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Descarregar dades_merged.csv",
+                data=csv_merged,
+                file_name="dades_merged.csv",
+                mime='text/csv',
+                key="download_merged"
+            )
+        except Exception as e:
+            st.error(f"Error al generar el CSV de dades_merged: {e}")
+
 
     st.markdown("</div>", unsafe_allow_html=True)
     
